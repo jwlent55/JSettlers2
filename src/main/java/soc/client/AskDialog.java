@@ -1,7 +1,7 @@
 /**
  * Java Settlers - An online multiplayer version of the game Settlers of Catan
  * Copyright (C) 2003  Robert S. Thomas
- * This file copyright (C) 2007-2010,2013-2014,2016-2017,2019-2020 Jeremy D Monin <jeremy@nand.net>
+ * This file copyright (C) 2007-2010,2013-2014,2016-2017,2019-2020,2026 Jeremy D Monin <jeremy@nand.net>
  * Portions of this file Copyright (C) 2013 Paul Bilnoski <paul@bilnoski.net>
  *
  * This program is free software; you can redistribute it and/or
@@ -175,7 +175,9 @@ public abstract class AskDialog extends JDialog
      *                 about a specific game.
      * @param titlebar Title bar text; if text contains \n, only the portion before \n is used.
      *                 If begins with \n, title is "JSettlers" instead.
-     * @param prompt   Prompting text shown above buttons, or null
+     * @param prompt   Prompting text shown above buttons, or null.
+     *                 Can be multi-line, use "\n" within your string to separate them.
+     *                 If starts with {@code "<html>"} (case-sensitive), will use a {@link JLabel} to render as HTML.
      * @param choice1  First choice button text
      * @param choice2  Second choice button text
      * @param default1 First choice is default
@@ -202,6 +204,9 @@ public abstract class AskDialog extends JDialog
      * Creates a new AskDialog with one button, not about a specific game.
      * For use by {@link NotifyDialog}.
      * parent cannot be null; use {@link #getParentWindow(Component)} to find it.
+     * @param prompt   Prompting text shown above buttons, or null.
+     *            Can be multi-line, use "\n" within your string to separate them.
+     *            If starts with {@code "<html>"} (case-sensitive), will use a {@link JLabel} to render as HTML.
      * @since 1.1.06
      */
     protected AskDialog(MainDisplay cli, Window parent,
@@ -224,7 +229,9 @@ public abstract class AskDialog extends JDialog
      * @param parent   SOCPlayerClient or other parent frame or dialog
      * @param titlebar Title bar text; if text contains \n, only the portion before \n is used.
      *            If begins with \n, title is "JSettlers" instead.
-     * @param prompt   Prompting text shown above buttons, or null
+     * @param prompt   Prompting text shown above buttons, or null.
+     *            Can be multi-line, use "\n" within your string to separate them.
+     *            If starts with {@code "<html>"} (case-sensitive), will use a {@link JLabel} to render as HTML.
      * @param choice1  First choice button text
      * @param choice2  Second choice button text
      * @param default1 First choice is default
@@ -254,7 +261,9 @@ public abstract class AskDialog extends JDialog
      * @param gamePI   Current game's player interface
      * @param titlebar Title bar text; if text contains \n, only the portion before \n is used.
      *            If begins with \n, title is "JSettlers" instead.
-     * @param prompt   Prompting text shown above buttons, or null
+     * @param prompt   Prompting text shown above buttons, or null.
+     *            Can be multi-line, use "\n" within your string to separate them.
+     *            If starts with {@code "<html>"} (case-sensitive), will use a {@link JLabel} to render as HTML.
      * @param choice1  First choice button text
      * @param choice2  Second choice button text
      * @param choice3  Third choice button text, or null if 2 buttons
@@ -290,6 +299,7 @@ public abstract class AskDialog extends JDialog
      *              If begins with \n, title is "JSettlers" instead.
      * @param prompt   Prompting text shown above buttons, or null.
      *              Can be multi-line, use "\n" within your string to separate them.
+     *              If starts with {@code "<html>"} (case-sensitive), will use a {@link JLabel} to render as HTML.
      * @param choice1  First choice button text
      * @param choice2  Second choice button text, or null if 1 button
      * @param choice3  Third choice button text, or null if 1 or 2 buttons
@@ -402,15 +412,21 @@ public abstract class AskDialog extends JDialog
                     }
                 }
 
-                JTextArea pmsg = new JTextArea(prompt);
-                pmsg.setEditable(false);
+                final JComponent pmsg;
+                if (prompt.startsWith("<html>"))
+                {
+                    pmsg = new JLabel(prompt);
+                } else {
+                    pmsg =  new JTextArea(prompt);
+                    ((JTextArea) pmsg).setEditable(false);
+                    ((JTextArea) pmsg).setLineWrap(true);
+                    ((JTextArea) pmsg).setWrapStyleWord(true);
+                }
                 // override fixed-width font in JFrame on win32
                 if (ourfont != null)
                     pmsg.setFont(ourfont);
                 else
                     pmsg.setFont(new Font("Dialog", Font.PLAIN, 12));
-                pmsg.setLineWrap(true);
-                pmsg.setWrapStyleWord(true);
                 if (! isOSHighContrast)
                 {
                     pmsg.setBackground(getBackground());  // avoid white background

@@ -36,19 +36,20 @@ import soc.util.Version;
  * @since 2.7.00
  */
 @SuppressWarnings("serial")
-/*package*/ class AboutDialog extends NotifyDialog
+/*package*/ class AboutDialog extends AskDialog
 {
+    final SOCPlayerClient cli;
+
     /**
      * Creates and shows a new AboutDialog.
      *<P>
      * Assumes currently running on AWT event thread.
      *
      * @param cli  Player client; not null, {@link SOCPlayerClient#getMainDisplay() cli.getMainDisplay()} not null
-     * @throws NullPointerException  if cli is null
-     * @throws IllegalArgumentException  if {@link SOCPlayerClient#getMainDisplay()} is null
+     * @throws NullPointerException  if cli or {@link SOCPlayerClient#getMainDisplay() cli.getMainDisplay()} is null
      */
     public static void createAndShow(SOCPlayerClient cli)
-        throws NullPointerException, IllegalArgumentException
+        throws NullPointerException
     {
         new AboutDialog(cli).setVisible(true);  // constructor checks for null cli etc
     }
@@ -57,13 +58,18 @@ import soc.util.Version;
      * Creates a new AboutDialog.
      *
      * @param cli  Player client; not null, {@link SOCPlayerClient#getMainDisplay() cli.getMainDisplay()} not null
-     * @throws NullPointerException  if cli is null
-     * @throws IllegalArgumentException  if {@link SOCPlayerClient#getMainDisplay()} is null
+     * @throws NullPointerException  if cli or {@link SOCPlayerClient#getMainDisplay() cli.getMainDisplay()} is null
      */
     private AboutDialog(SOCPlayerClient cli)
-        throws NullPointerException, IllegalArgumentException
+        throws NullPointerException
     {
-        super(cli.getMainDisplay(), null, buildText(cli), null, true);  // super checks for null mainDisplay
+        super
+            (cli.getMainDisplay(),
+             getParentWindow(cli.getMainDisplay().getGUIContainer()),
+             "\n", buildText(cli),
+             strings.get("dialog.recent.button"), strings.get("base.ok"),  // "Recent Versions..."
+             false, true);
+        this.cli = cli;
         setModal(false);
         setTitle(strings.get("dialog.about.title"));  // "About JSettlers"
     }
@@ -101,6 +107,24 @@ import soc.util.Version;
 
         return sb.toString();
     }
+
+    /**
+     * React to the "Recent Versions" button.
+     */
+    public void button1Chosen()
+    {
+        RecentVersionsInfoDialog.createAndShow(cli);
+    }
+
+    /**
+     * React to the OK button.
+     */
+    public void button2Chosen() {}
+
+    /**
+     * React to the dialog window closed by user. (Nothing to do)
+     */
+    public void windowCloseChosen() {}
 
     /**
      * MouseListener which shows this dialog when a Swing component is clicked,

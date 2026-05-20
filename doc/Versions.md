@@ -60,7 +60,8 @@ JARs for recent JSettlers versions can be downloaded from
 	    - Even if client can't join game, show its options (with server v2.7.00 or newer)
 	    - Added context menu to copy game name to clipboard
 	- Main window:
-	    - Version info is underlined; click to show "About JSettlers" dialog
+	    - Version info is underlined; click to show new "About JSettlers" dialog
+	    - New "Recent Versions" info window; can be shown from About dialog
 	- When started with command line params, and then connection to server is lost, show same buttons as when started with none: Reconnect, practice, etc (issue #108)
 	- Don't set gotPassword field while joining a practice game
 	- Game stats:
