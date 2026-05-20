@@ -19,6 +19,13 @@
  **/
 package soc.client;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.TreeMap;
+
 /**
  * Show recent releases and their brief release notes, based on github releases and doc/Versions.md.
  * @since 2.7.00
@@ -29,6 +36,11 @@ public class RecentVersionsInfoDialog extends NotifyDialog
     // TODO adjust size and wrapping
     // TODO allow text selecton
     // TODO can we make URLs clickable?
+
+    /**
+     * Release notes directory path within our jar: {@code "/resources/recentVersions"}.
+     */
+    public final static String RELNOTES_RSRC_DIR_PATH = "/resources/recentVersions";
 
     /**
      * Creates and shows a new RecentVersionsInfoDialog.
@@ -72,77 +84,79 @@ public class RecentVersionsInfoDialog extends NotifyDialog
         StringBuilder sb = new StringBuilder("<html><body>\n<H3>");
         sb.append(strings.get("dialog.recent.title"));  // "Recent Versions of JSettlers"
         sb.append("</H3>\n");
-        // TODO retrieve these from resources
-        sb.append("<H4>2.6.10 (2022-07-05)</H4>\n  <ul>\n"
-                + "<li> Server:\n"
-                + "   <ul>\n"
-                + "        <li> At end of game, also show players their resource trade <tt>*STATS*</tt> if client is v2.6.00 or newer\n"
-                + "  <!--  Other changes: see a href=\"https://github.com/jdmonin/JSettlers2/blob/release-2.6.10/doc/Versions.md\" -->\n"
-                + "  </ul>\n"
-                + "<li> No changes to client.\n"
-                + "  </ul>\n"
-                + "\n"
-                + "<H4>2.6.00 (2022-06-12)</H4>\n"
-                + "  <ul>\n"
-                + "<li> I18N: Added Polish translation (thank you KotCzarny)\n"
-                + "<li> Client:\n"
-                + "   <ul>\n"
-                + "        <li> Game window:\n"
-                + "           <ul>\n"
-                + "                <li> Moving robber: If hex is desert, don't ask \"are you sure\" when you have an adjacent settlement/city\n"
-                + "                <li> Less flicker while resizing window\n"
-                + "           </ul>\n"
-                + "        <li> More consistent sound quality on Windows 10\n"
-                + "   </ul>\n"
-                + "  <LI> Game <tt>*STATS*</tt>: Show player's resource totals given/received with ports, bank, other players\n"
-                + "          if client and server are v2.6.00 or newer\n"
-                + "  <LI> Other changes: see <a href=\"https://github.com/jdmonin/JSettlers2/blob/release-2.6.00/doc/Versions.md\"><tt>Versions.md</tt></a>\n"
-                + "  </ul>\n"
-                + "\n"
-                + " <H4>2.5.00 (2021-12-30)</H4>\n"
-                + "  <ul>\n"
-                + "<li> Gameplay:\n"
-                + "   <ul>\n"
-                + "        <li> Road Building: If player cancels placement or ends turn before placing the first free road or ship, the dev card is returned to their hand\n"
-                + "        <li> When a trade is offered to bots and humans, bots wait longer before responding. Was 3 seconds, is now 8, changeable with server property <tt>jsettlers.bot.human.pause</tt> (thank you Lee Passey)\n"
-                + "        <li> Recalc Longest Route when building coastal settlement to connect a player's roads to ships (thanks kotc for reporting issue #95)\n"
-                + "        <li> Pirate Islands scenario: Ship placement: Fix client bug where placing a coastal ship next to a road would prevent any further ship building, based on \"no branches in route\" rule\n"
-                + "   </ul>\n"
-                + "<li> I18N:\n"
-                + "   <ul>\n"
-                + "        <li> Added French translation (thank you Lee Passey)\n"
-                + "   </ul>\n"
-                + "<li> Client:\n"
-                + "   <ul>\n"
-                + "     <li> Game window:\n"
-                + "        <ul>\n"
-                + "        <li> Added hotkey Ctrl-B/Alt-B/Cmd-B to ask to Special Build in 6-player game\n"
-                + "        <li> Discards: List resources you discarded, not just total amount, in game action textarea\n"
-                + "        <li> Forgotten Tribe scenario: Much less flicker while placing gift ports\n"
-                + "        </ul>\n"
-                + "     <li> New Game dialog: \n"
-                + "        <ul>\n"
-                + "        <li> If server has increased default VP to win, use that as minimum when picking a scenario\n"
-                + "        </ul> \n"
-                + "     <li> If client starts a TCP server, keep it running; previous versions timed out after being idle an hour (thanks kotc for reporting issue #81)\n"
-                + "     <li> Linux/Unix: Use sub-pixel font antialiasing if available (thanks kotc for issue #92)\n"
-                + "   </ul>\n"
-                + "<li> Bots/AI:\n"
-                + "   <ul>\n"
-                + "        <li> Shorten pause after bot requests a bank trade\n"
-                + "   </ul>\n"
-                + "<li> Server:\n"
-                + "   <ul>\n"
-                + "        <li> During game reset, don't send chat recap: Chat text is still in clients' game windows\n"
-                + "        <li> If default VP is set on command line or properties, will also be minimum VP for any scenario\n"
-                + "        <li> Other server changes: see <a href=\"https://github.com/jdmonin/JSettlers2/blob/main/doc/Versions.md\"><tt>Versions.md</tt></a>\n"
-                + "   </ul>\n"
-                + "  <LI> Other changes: see <a href=\"https://github.com/jdmonin/JSettlers2/blob/main/doc/Versions.md\"><tt>Versions.md</tt></a>\n"
-                + "  </ul>\n"
-                + "<P>&nbsp;<P>For earlier versions, see <a href=\"https://github.com/jdmonin/JSettlers2/releases\">Releases at GitHub</a>."
-                );
+
+        try
+        {
+            ReleaseNotesFromDirectory rv = new ReleaseNotesFromDirectory(RELNOTES_RSRC_DIR_PATH);
+
+            for (String fname : rv.notesHTML.descendingKeySet())
+            {
+                if (fname.charAt(0) != 'v')
+                    continue;
+                sb.append(rv.notesHTML.get(fname));
+            }
+            if (rv.notesHTML.containsKey("footer.html"))
+                sb.append(rv.notesHTML.get("footer.html"));
+
+        } catch (IOException e) {
+            sb.append("Unexpected error:<BR>Cannot read release notes within JAR:<BR>");
+            sb.append(e.toString());
+        }
 
         return sb.toString();
+    }
+
+    /**
+     * Reads all notes files in a given resource directory.
+     * Constructor collects them into {@link #notesHTML}.
+     */
+    public static class ReleaseNotesFromDirectory
+    {
+        /**
+         * HTML text resource contents read during constructor.
+         * Keys are {@code *.html} filenames in the constructor's dirPath: {@code "v2610.html"}, {@code "footer.html"}, etc.
+         * To iterate from newest to oldest versions, use {@link TreeMap#descendingKeySet()}.
+         * Values are the file contents, read as UTF-8.
+         */
+        public final TreeMap<String, String> notesHTML = new TreeMap<>();
+
+        /**
+         * Read resource contents into a new ReleaseNotesFromDirectory.
+         * Reads into {@link #notesHTML}; see that field for structure of loaded data.
+         * @param resDirPath  Resource directory path to read, within our jar or classpath
+         * @throws IOException if ...
+         */
+        public ReleaseNotesFromDirectory(final String resDirPath)
+            throws IOException
+        {
+            // TODO actually scan; method may differ between jar and filesystem/IDE runs
+            notesHTML.put("footer.html", "");
+            notesHTML.put("v2500.html", "");
+            notesHTML.put("v2600.html", "");
+            notesHTML.put("v2610.html", "");
+
+            final char[] buffer = new char[2048];
+            final StringBuilder sb = new StringBuilder();
+            for (Map.Entry<String, String> entry : notesHTML.entrySet())
+            {
+                final String fname = entry.getKey();
+
+                try (InputStream ins = getClass().getResourceAsStream(resDirPath + "/" + fname))
+                {
+                    if (ins == null)
+                        entry.setValue("(cannot read " + fname + ")");
+                    else
+                        try (InputStreamReader insr = new InputStreamReader(ins, StandardCharsets.UTF_8))
+                        {
+                            sb.delete(0, sb.length());
+                            for (int numRead; (numRead = insr.read(buffer, 0, buffer.length)) > 0; )
+                                sb.append(buffer, 0, numRead);
+
+                            entry.setValue(sb.toString());
+                        }
+                }
+            }
+        }
     }
 
 }

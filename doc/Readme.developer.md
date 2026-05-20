@@ -1198,6 +1198,9 @@ updates [Versions.md](Versions.md) with the final build number,
 with a commit message like: "Version 2.4.00 is build JM20200704"  
 Then: `git tag -a release-2.4.00 -m 'Version 2.4.00 is build JM20200704'`
 
+After making a new release, commit its brief release notes as HTML in
+`src/main/resources/resources/recentVersions` for `RecentVersionsInfoDialog`.
+
 ### Historical info
 
 While v2.0.00 was being developed, several 1.x.xx releases came out.
