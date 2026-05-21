@@ -19,10 +19,22 @@
  **/
 package soc.client;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collections;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -124,17 +136,54 @@ public class RecentVersionsInfoDialog extends NotifyDialog
          * Read resource contents into a new ReleaseNotesFromDirectory.
          * Reads into {@link #notesHTML}; see that field for structure of loaded data.
          * @param resDirPath  Resource directory path to read, within our jar or classpath
-         * @throws IOException if ...
+         * @throws IOException if {@code resDirPath} not found, not a directory, or not readable
          */
         public ReleaseNotesFromDirectory(final String resDirPath)
             throws IOException
         {
-            // TODO actually scan; method may differ between jar and filesystem/IDE runs
-            notesHTML.put("footer.html", "");
-            notesHTML.put("v2500.html", "");
-            notesHTML.put("v2600.html", "");
-            notesHTML.put("v2610.html", "");
+            // Scan that dir path for *.html filenames:
+            {
+                final URI dirUri;
+                try
+                {
+                    URL dirUrl = getClass().getResource(resDirPath);
+                    if (dirUrl == null)
+                        throw new FileNotFoundException("Path not found: " + resDirPath);
+                    dirUri = dirUrl.toURI();
+                } catch (URISyntaxException e) {
+                    throw new IOException("URISyntaxException for path", e);  // unlikely to occur
+                }
 
+                if ("jar".equals(dirUri.getScheme()))
+                {
+                    try (FileSystem fileSystem = FileSystems.newFileSystem(dirUri, Collections.emptyMap()))
+                    {
+                        try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(fileSystem.getPath(resDirPath)))
+                        {
+                            for (Path dirEntry : dirStream)
+                            {
+                                String fname = dirEntry.getFileName().toString();
+                                if (fname.toLowerCase(Locale.US).endsWith(".html"))
+                                    notesHTML.put(fname, "");
+                            }
+                        }
+                        // if not a dir, throws NotDirectoryException with detail text containing resDirPath;
+                        // we don't need to catch and re-throw
+                    }
+                }
+                else if ("file".equals(dirUri.getScheme()))  // probably running in an IDE
+                {
+                    File dirFile = new File(dirUri);
+                    if (! dirFile.isDirectory())
+                        throw new IOException("Not a directory: " + resDirPath);
+
+                    for (String fname : dirFile.list())
+                        if (fname.toLowerCase(Locale.US).endsWith(".html"))
+                            notesHTML.put(fname, "");
+                }
+            }
+
+            // Now read their contents:
             final char[] buffer = new char[2048];
             final StringBuilder sb = new StringBuilder();
             for (Map.Entry<String, String> entry : notesHTML.entrySet())
