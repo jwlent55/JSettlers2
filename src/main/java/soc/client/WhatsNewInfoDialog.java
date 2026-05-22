@@ -39,23 +39,23 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Show recent releases and their brief release notes, based on github releases and doc/Versions.md.
+ * Show what's new in JSettlers: brief release notes for current and recent releases,
+ * based on github releases and doc/Versions.md.
  * @since 2.7.00
  */
 @SuppressWarnings("serial")
-public class RecentVersionsInfoDialog extends NotifyDialog
+public class WhatsNewInfoDialog extends NotifyDialog
 {
-    // TODO adjust size and wrapping
     // TODO allow text selecton
     // TODO can we make URLs clickable?
 
     /**
-     * Release notes directory path within our jar: {@code "/resources/recentVersions"}.
+     * Release notes directory path within our jar: {@code "/resources/releaseNotes"}.
      */
-    public final static String RELNOTES_RSRC_DIR_PATH = "/resources/recentVersions";
+    public final static String RELNOTES_RSRC_DIR_PATH = "/resources/releaseNotes";
 
     /**
-     * Creates and shows a new RecentVersionsInfoDialog.
+     * Creates and shows a new WhatsNewInfoDialog.
      *<P>
      * Assumes currently running on AWT event thread.
      *
@@ -66,22 +66,22 @@ public class RecentVersionsInfoDialog extends NotifyDialog
     public static void createAndShow(SOCPlayerClient cli)
         throws NullPointerException, IllegalArgumentException
     {
-        new RecentVersionsInfoDialog(cli).setVisible(true);  // constructor checks for null cli, mainDisplay
+        new WhatsNewInfoDialog(cli).setVisible(true);  // constructor checks for null cli, mainDisplay
     }
 
     /**
-     * Creates a new RecentVersionsInfoDialog.
+     * Creates a new WhatsNewInfoDialog.
      *
      * @param cli  Player client; not null, {@link SOCPlayerClient#getMainDisplay() cli.getMainDisplay()} not null
      * @throws NullPointerException  if cli is null
      * @throws IllegalArgumentException  if {@link SOCPlayerClient#getMainDisplay()} is null
      */
-    private RecentVersionsInfoDialog(SOCPlayerClient cli)
+    private WhatsNewInfoDialog(SOCPlayerClient cli)
         throws NullPointerException, IllegalArgumentException
     {
         super(cli.getMainDisplay(), null, buildHTML(cli), null, true);  // super checks for null mainDisplay
         setModal(false);
-        setTitle(strings.get("dialog.recent.title"));  // "Recent Versions of JSettlers"
+        setTitle(strings.get("dialog.whatsnew.title"));  // "What's New: Recent Versions of JSettlers"
     }
 
     /**
@@ -94,7 +94,7 @@ public class RecentVersionsInfoDialog extends NotifyDialog
     private static String buildHTML(final SOCPlayerClient cli)
     {
         StringBuilder sb = new StringBuilder("<html><body>\n<H3>");
-        sb.append(strings.get("dialog.recent.title"));  // "Recent Versions of JSettlers"
+        sb.append(strings.get("dialog.whatsnew.title"));  // "What's New: Recent Versions of JSettlers"
         sb.append("</H3>\n");
 
         try

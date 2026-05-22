@@ -61,7 +61,7 @@ JARs for recent JSettlers versions can be downloaded from
 	    - Added context menu to copy game name to clipboard
 	- Main window:
 	    - Version info is underlined; click to show new "About JSettlers" dialog
-	    - New "Recent Versions" info window; can be shown from About dialog
+	    - Added "What's New" info window; can be shown from About dialog
 	- When started with command line params, and then connection to server is lost, show same buttons as when started with none: Reconnect, practice, etc (issue #108)
 	- Don't set gotPassword field while joining a practice game
 	- Game stats:
@@ -101,6 +101,7 @@ JARs for recent JSettlers versions can be downloaded from
 	        - BoardInfo: add optional field fogHiddenHexes
 	        - MODEL_VERSION still 2400; earlier server versions will ignore new fields while loading a savegame
 	- Robots: If SOCGame.restoreLargestArmyState called before saveLargestArmyState, do nothing
+	- AskDialog, NotifyDialog can now render basic html docs (used by WhatsNewInfoDialog)
 	- To help unit tests, SOCGame.initAtServer now calls startGame_setupDevCards
 	- To help unit tests which create games:
 	    - TestRecorder:

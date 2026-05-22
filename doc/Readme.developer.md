@@ -1198,8 +1198,10 @@ updates [Versions.md](Versions.md) with the final build number,
 with a commit message like: "Version 2.4.00 is build JM20200704"  
 Then: `git tag -a release-2.4.00 -m 'Version 2.4.00 is build JM20200704'`
 
-After making a new release, commit its brief release notes as HTML in
-`src/main/resources/resources/recentVersions` for `RecentVersionsInfoDialog`.
+After bumping version to start developing the next release,
+commit a new file for its brief release notes into
+`src/main/resources/resources/releaseNotes` for `WhatsNewInfoDialog`.
+Keep that updated during development.
 
 ### Historical info
 

@@ -67,7 +67,7 @@ import soc.util.Version;
             (cli.getMainDisplay(),
              getParentWindow(cli.getMainDisplay().getGUIContainer()),
              "\n", buildText(cli),
-             strings.get("dialog.recent.button"), strings.get("base.ok"),  // "Recent Versions..."
+             strings.get("dialog.whatsnew.button"), strings.get("base.ok"),  // "What's New..."
              false, true);
         this.cli = cli;
         setModal(false);
@@ -109,11 +109,11 @@ import soc.util.Version;
     }
 
     /**
-     * React to the "Recent Versions" button.
+     * React to the "What's New" button.
      */
     public void button1Chosen()
     {
-        RecentVersionsInfoDialog.createAndShow(cli);
+        WhatsNewInfoDialog.createAndShow(cli);
     }
 
     /**
