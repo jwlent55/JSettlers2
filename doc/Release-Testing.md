@@ -6,7 +6,8 @@ When preparing to release a new version, testing should include:
 
 - Before building the JARs to be tested, `git status` should have no untracked or uncommitted changes
     - Run `gradle distCheckSrcDirty` to check that and list any files with such changes
-- `gradle clean test` runs without failures, under gradle 6.9.x and 7.5.x
+- All unit tests run in IDE without failures
+- `gradle clean build` runs without failures, under gradle 6.9.x and 7.5.x
 - These should print the expected version and build number:
     - `java -jar build/libs/JSettlers-2.*.jar --version`
     - `java -jar build/libs/JSettlersServer-2.*.jar --version`
@@ -61,6 +62,11 @@ When preparing to release a new version, testing should include:
     - Board resizes with window
     - Sound works
     - Bots' face icons match their name (Robots smarter than Droids)
+    - Click underlined version to show About dialog from:
+        - Initial connect-or-practice panel
+        - Main display after starting a server: Underlined Port number -> About JSettlers
+        - Main display after connecting to a server: Should show both client and server versions
+    - In About dialog, click What's New; should see brief release notes for current and recent versions
 - Chat channels:
     - While connected to a server, start 2 chat channels
     - In one of those channels, say a few lines ("x", "y", "z" etc)

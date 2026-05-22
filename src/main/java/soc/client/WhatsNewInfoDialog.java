@@ -125,6 +125,12 @@ public class WhatsNewInfoDialog extends NotifyDialog
     public static class ReleaseNotesFromDirectory
     {
         /**
+         * Size (chars) of the buffer used while reading into notesHTML.
+         * This is public for use in a unit test.
+         */
+        public static final int BUFFER_SIZE = 2048;
+
+        /**
          * HTML text resource contents read during constructor.
          * Keys are {@code *.html} filenames in the constructor's dirPath: {@code "v2610.html"}, {@code "footer.html"}, etc.
          * To iterate from newest to oldest versions, use {@link TreeMap#descendingKeySet()}.
@@ -184,7 +190,7 @@ public class WhatsNewInfoDialog extends NotifyDialog
             }
 
             // Now read their contents:
-            final char[] buffer = new char[2048];
+            final char[] buffer = new char[BUFFER_SIZE];
             final StringBuilder sb = new StringBuilder();
             for (Map.Entry<String, String> entry : notesHTML.entrySet())
             {
