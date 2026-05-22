@@ -19,12 +19,15 @@
  **/
 package soc.client;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -45,6 +48,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.Scrollable;
 import javax.swing.SwingConstants;
 
 /**
@@ -370,8 +374,8 @@ public abstract class AskDialog extends JDialog
             choice3But = null;
         }
         choiceDefault = defaultChoice;
-        setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
 
+        final boolean hasBorderLayout;
         int promptMultiLine = prompt.indexOf('\n');
         if (promptMultiLine == 0)
         {
@@ -386,12 +390,18 @@ public abstract class AskDialog extends JDialog
         int promptLines = 1;
         if (promptMultiLine == -1)
         {
+            hasBorderLayout = false;
+            setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
+
             isMsgMultiLine = false;
             msg = new JLabel(prompt, SwingConstants.CENTER);
             msg.setAlignmentX(Component.CENTER_ALIGNMENT);
             add(msg);
             promptMaxWid = getFontMetrics(msg.getFont()).stringWidth(prompt);
         } else {
+            hasBorderLayout = true;
+            setLayout(new BorderLayout());
+
             promptMaxWid = 0;
             try
             {
@@ -415,7 +425,7 @@ public abstract class AskDialog extends JDialog
                 final JComponent pmsg;
                 if (prompt.startsWith("<html>"))
                 {
-                    pmsg = new JLabel(prompt);
+                    pmsg = new ScrollableHTMLJLabelPanel(prompt);
                 } else {
                     pmsg =  new JTextArea(prompt);
                     ((JTextArea) pmsg).setEditable(false);
@@ -435,7 +445,7 @@ public abstract class AskDialog extends JDialog
                 JScrollPane pScroll = new JScrollPane(pmsg);
                 pScroll.setOpaque(false);
                 msg = pScroll;
-                add(pScroll);
+                add(pScroll, BorderLayout.CENTER);
 
                 final int maxWid80pct = (4 * parent.getWidth()) / 5;
                 if (promptMaxWid > maxWid80pct)
@@ -445,7 +455,7 @@ public abstract class AskDialog extends JDialog
                 // fallback to 1 long line
                 msg = new JLabel(prompt, SwingConstants.CENTER);
                 msg.setAlignmentX(Component.CENTER_ALIGNMENT);
-                add(msg);
+                add(msg, BorderLayout.CENTER);
                 promptMaxWid = getFontMetrics(msg.getFont()).stringWidth(prompt);
                 promptMultiLine = -1;  // force msgIsMultiLine to be false
             }
@@ -494,7 +504,10 @@ public abstract class AskDialog extends JDialog
             }
         }
 
-        add(pBtns);
+        if (hasBorderLayout)
+            add(pBtns, BorderLayout.SOUTH);
+        else
+            add(pBtns);
 
         // Now that we've added buttons to the dialog layout,
         // we can get their font and adjust style of default button.
@@ -836,6 +849,60 @@ public abstract class AskDialog extends JDialog
         }
         catch (Throwable e) {
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * Panel which holds an html-containing {@link JLabel},
+     * intended to be placed within a {@link JScrollPane} and match its width
+     * within a BorderLayout's {@link BorderLayout#CENTER},
+     * which causes the rendered html to word-wrap properly.
+     *<P>
+     * This panel's {@link Scrollable#getScrollableTracksViewportWidth()} returns {@code true},
+     * which prevents the JLabel from fighting the scrollpane for how wide to be,
+     * so it won't end up wider than the dialog window holding the BorderLayout and JLabel
+     * instead of word-wrapping.
+     *
+     * @since 2.7.00
+     */
+    public static class ScrollableHTMLJLabelPanel
+        extends JPanel implements Scrollable
+    {
+        public final JLabel label;
+
+        public ScrollableHTMLJLabelPanel
+            (final String html)
+        {
+            setLayout(new BorderLayout());
+            label = new JLabel(html);
+            add(label, BorderLayout.CENTER);
+        }
+
+        public boolean getScrollableTracksViewportWidth()
+        {
+            return true;
+        }
+
+        public boolean getScrollableTracksViewportHeight()
+        {
+            return false;
+        }
+
+        public Dimension getPreferredScrollableViewportSize()
+        {
+            return getPreferredSize();
+        }
+
+        public int getScrollableUnitIncrement
+            (final Rectangle visibleRect, final int orientation, final int direction)
+        {
+            return 32;
+        }
+
+        public int getScrollableBlockIncrement
+            (final Rectangle visibleRect, final int orientation, final int direction)
+        {
+            return 160;
         }
     }
 
