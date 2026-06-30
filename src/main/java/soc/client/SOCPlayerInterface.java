@@ -1686,7 +1686,7 @@ public class SOCPlayerInterface extends JFrame
     {
         final int gstate = game.getGameState();
         final boolean clientSatAlready = (clientHand != null);
-        boolean noTextOverlay = ((! show) || isGameStart
+        boolean noTextOverlay = ((! show) || isGameStart || (gstate >= SOCGame.OVER)
             || (clientSatAlready && ((gstate >= SOCGame.READY) || game.isBoardReset())));
         if (gstate == SOCGame.NEW)
             isGameStart = true;  // change this param only after setting noTextOverlay
